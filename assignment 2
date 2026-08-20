@@ -1,0 +1,102 @@
+#include <stdio.h>
+#define MAX 10
+#define MAX_TERMS 100
+int convertToCompact(int rows, int cols, int matrix[MAX][MAX], int compact[MAX_TERMS][3]) {
+    int k = 0;
+    for(int i = 0; i < rows; i++) {
+        for(int j = 0; j < cols; j++) {
+            if(matrix[i][j] != 0) {
+                compact[k][0] = i;       // row
+                compact[k][1] = j;       // column
+                compact[k][2] = matrix[i][j]; // value
+                k++;
+            }
+        }
+    }
+    return k; // number of non-zero elements
+}
+void displayCompact(int compact[MAX_TERMS][3], int count) {
+    printf("\nCompact Form (row col value):\n");
+    for(int i = 0; i < count; i++) {
+        printf("%d %d %d\n", compact[i][0], compact[i][1], compact[i][2]);
+    }
+}
+void simpleTranspose(int compact[MAX_TERMS][3], int count) {
+    printf("\nSimple Transpose (row col value):\n");
+    for(int i = 0; i < count; i++) {
+        printf("%d %d %d\n", compact[i][1], compact[i][0], compact[i][2]);
+    }
+}
+
+// Fast transpose
+void fastTranspose(int compact[MAX_TERMS][3], int count, int rows, int cols) {
+    int rowTerms[cols], startingPos[cols];
+    int transpose[MAX_TERMS][3];
+    for(int i = 0; i < cols; i++)
+        rowTerms[i] = 0;
+    for(int i = 0; i < count; i++)
+        rowTerms[compact[i][1]]++;
+    startingPos[0] = 0;
+    for(int i = 1; i < cols; i++)
+        startingPos[i] = startingPos[i-1] + rowTerms[i-1];
+    for(int i = 0; i < count; i++) {
+        int col = compact[i][1];
+        int pos = startingPos[col];
+        transpose[pos][0] = compact[i][1];
+        transpose[pos][1] = compact[i][0];
+        transpose[pos][2] = compact[i][2];
+        startingPos[col]++;
+    }
+
+    printf("\nFast Transpose (row col value):\n");
+    for(int i = 0; i < count; i++) {
+        printf("%d %d %d\n", transpose[i][0], transpose[i][1], transpose[i][2]);
+    }
+}
+int main() {
+    int rows, cols, matrix[MAX][MAX];
+    int compact[MAX_TERMS][3];
+    int choice, count = 0;
+    printf("Enter number of rows and columns: ");
+    scanf("%d %d", &rows, &cols);
+    printf("Enter elements of the matrix:\n");
+    for(int i = 0; i < rows; i++) {
+        for(int j = 0; j < cols; j++) {
+            scanf("%d", &matrix[i][j]);
+        }
+    }
+    do {
+        printf("\n----- MENU -----\n");
+        printf("1. Convert to Compact Form\n");
+        printf("2. Simple Transpose\n");
+        printf("3. Fast Transpose\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+        switch(choice) {
+            case 1:
+                count = convertToCompact(rows, cols, matrix, compact);
+                displayCompact(compact, count);
+                break;
+            case 2:
+                if(count > 0)
+                    simpleTranspose(compact, count);
+                else
+                    printf("First convert to compact form!\n");
+                break;
+            case 3:
+                if(count > 0)
+                    fastTranspose(compact, count, rows, cols);
+                else
+                    printf("First convert to compact form!\n");
+                break;
+            case 4:
+                printf("Program Ended.\n");
+                break;
+            default:
+                printf("Invalid choice!\n");
+        }
+    } while(choice != 4);
+
+    return 0;
+}
