@@ -1,0 +1,102 @@
+#include <stdio.h>
+#include <string.h>
+
+struct PrintJob {
+    int jobID;
+    char title[50];
+};
+
+struct PrintJob queue[5];
+int front = -1, rear = -1;
+
+int isFull() {
+    return (front == (rear + 1) % 5);
+}
+
+int isEmpty() {
+    return (front == -1);
+}
+
+void enqueue(struct PrintJob job) {
+    if(isFull()) {
+        printf("Queue is full! Cannot add new job.\n");
+        return;
+    }
+    if(front == -1) front = 0;
+    rear = (rear + 1) % 5;
+    queue[rear] = job;
+    printf("Job added: ID=%d, Title=%s\n", job.jobID, job.title);
+}
+
+struct PrintJob dequeue() {
+    struct PrintJob job;
+    if(isEmpty()) {
+        printf("Queue is empty! No jobs to process.\n");
+        job.jobID = -1;
+        strcpy(job.title, "NULL");
+        return job;
+    }
+    job = queue[front];
+    if(front == rear) {
+        front = rear = -1; // reset queue
+    } else {
+        front = (front + 1) % 5;
+    }
+    return job;
+}
+
+void display() {
+    if(isEmpty()) {
+        printf("Queue is empty.\n");
+        return;
+    }
+    printf("\nCurrent Print Jobs in Queue:\n");
+    int i = front;
+    while(1) {
+        printf("Job ID: %d, Title: %s\n", queue[i].jobID, queue[i].title);
+        if(i == rear) break;
+        i = (i + 1) % 5;
+    }
+}
+
+int main() {
+    int choice;
+    struct PrintJob job;
+
+    do {
+        printf("\n--- Printer Job Queue ---\n");
+        printf("1. Add Print Job\n");
+        printf("2. Process Print Job\n");
+        printf("3. Display Queue\n");
+        printf("0. Exit\n");
+        printf("Enter choice: ");
+        scanf("%d", &choice);
+
+        switch(choice) {
+            case 1:
+                if(isFull()) {
+                    printf("Queue is full! Cannot add new job.\n");
+                } else {
+                    printf("Enter Job ID: ");
+                    scanf("%d", &job.jobID);
+                    printf("Enter Document Title: ");
+                    scanf("%s", job.title);
+                    enqueue(job);
+                }
+                break;
+            case 2:
+                if(isEmpty()) {
+                    printf("Queue is empty! No jobs to process.\n");
+                } else {
+                    job = dequeue();
+                    printf("Processing Job ID: %d, Title: %s\n", job.jobID, job.title);
+                }
+                break;
+            case 3:
+                display();
+                break;
+        }
+    } while(choice != 0);
+
+    return 0;
+}
